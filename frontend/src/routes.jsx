@@ -19,9 +19,9 @@ import PrestamoDetailPage from './features/prestamos/PrestamoDetailPage';
 import PrestamoFormPage from './features/prestamos/PrestamoFormPage';
 
 // Reportes
-import ReporteMaterialesPage from './features/materiales/MaterialListPage'; // temporalmente reutilizamos la misma página
-import ReportePrestamosPage from './features/prestamos/PrestamoListPage';   // hasta que hagamos Phase 5
-import ReporteGeneralPage from './features/usuarios/UsuarioListPage';       // idem
+import ReporteMaterialesPage from './features/reportes/ReporteMaterialesPage';
+import ReportePrestamosPage from './features/reportes/ReportePrestamosPage';
+import ReporteGeneralPage from './features/reportes/ReporteGeneralPage';
 
 export default function RoutesConfig() {
 return (
