@@ -1,0 +1,33 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: bibliopg
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespass
+      POSTGRES_DB: bibliodb
+    ports:
+      - "5432:5432"
+    volumes:
+      - bibliopg_data:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: ./backend
+    container_name: backend_app
+    depends_on:
+      - postgres
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./backend/.env
+    volumes:
+      - ./backend:/app/backend
+    command: >
+      sh -c "uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload"
+
+volumes:
+  bibliopg_data:
