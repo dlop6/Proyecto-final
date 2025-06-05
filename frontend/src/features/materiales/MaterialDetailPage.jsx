@@ -1,53 +1,46 @@
 // src/features/materiales/MaterialDetailPage.jsx
-
-import React from 'react';
-import { useParams, Link } from 'react-router-dom';
-import materialesMock from '../../services/mock/materialesMock';
+import React, { useState, useEffect } from "react";
+import { useParams, Link } from "react-router-dom";
+import { getMaterialById } from "../../services/api/materialesApi";
 
 export default function MaterialDetailPage() {
   const { id } = useParams();
-  const material = materialesMock.find((m) => String(m.id) === id);
+  const [material, setMaterial] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  if (!material) {
-    return (
-      <div style={{ padding: '1rem' }}>
-        <h2>Material no encontrado</h2>
-        <Link to="/materiales">← Volver a Lista de Materiales</Link>
-      </div>
-    );
-  }
+  useEffect(() => {
+    getMaterialById(id)
+      .then((res) => {
+        setMaterial(res);
+      })
+      .catch((err) => {
+        console.error(err);
+        setError(err);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [id]);
+
+  if (loading) return <p>Cargando detalle...</p>;
+  if (error) return <p>Error al cargar detalle</p>;
 
   return (
-    <div style={{ padding: '1rem' }}>
+    <div>
       <h1>Detalle de Material</h1>
-      <div style={{ marginBottom: '1rem' }}>
-        <strong>ID:</strong> {material.id}
-      </div>
-      <div style={{ marginBottom: '1rem' }}>
-        <strong>Título:</strong> {material.titulo}
-      </div>
-      <div style={{ marginBottom: '1rem' }}>
-        <strong>Autor:</strong> {material.autor}
-      </div>
-      <div style={{ marginBottom: '1rem' }}>
-        <strong>Categoría:</strong> {material.categoria}
-      </div>
-      <div style={{ marginBottom: '1rem' }}>
-        <strong>Cantidad Total:</strong> {material.cantidad_total}
-      </div>
-      <div style={{ marginBottom: '1rem' }}>
-        <strong>Cantidad Disponible:</strong> {material.cantidad_disponible}
-      </div>
-      <div style={{ marginBottom: '1rem' }}>
-        <strong>Fecha de Publicación:</strong> {material.fecha_publicacion}
-      </div>
-      <div style={{ marginBottom: '1rem' }}>
-        <strong>Ubicación:</strong> {material.ubicacion}
-      </div>
-      <div style={{ marginBottom: '1rem' }}>
-        <strong>Descripción:</strong> {material.descripcion || '—'}
-      </div>
-      <Link to="/materiales">← Volver a Lista de Materiales</Link>
+      <p><strong>ID:</strong> {material.id}</p>
+      <p><strong>Título:</strong> {material.titulo}</p>
+      <p><strong>Autor:</strong> {material.autor}</p>
+      <p><strong>Categoría:</strong> {material.categoria}</p>
+      <p><strong>Cantidad Total:</strong> {material.cantidad_total}</p>
+      <p><strong>Cantidad Disponible:</strong> {material.cantidad_disponible}</p>
+      <p><strong>Fecha Publicación:</strong> {material.fecha_publicacion}</p>
+      <p><strong>Descripción:</strong> {material.descripcion}</p>
+      <p><strong>Ubicación:</strong> {material.ubicacion}</p>
+
+      <Link to={`/materiales/${id}/editar`}>Editar</Link> |{" "}
+      <Link to="/materiales">Volver a la lista</Link>
     </div>
   );
 }

@@ -1,56 +1,40 @@
 // src/features/prestamos/PrestamoDetailPage.jsx
-
-import React from 'react';
-import { useParams, Link } from 'react-router-dom';
-import prestamosMock from '../../services/mock/prestamosMock';
+import React, { useState, useEffect } from "react";
+import { useParams, Link } from "react-router-dom";
+import { getPrestamoById } from "../../services/api/prestamosApi";
 
 export default function PrestamoDetailPage() {
   const { id } = useParams();
-  const prestamo = prestamosMock.find((p) => String(p.id) === id);
+  const [prestamo, setPrestamo] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  if (!prestamo) {
-    return (
-      <div style={{ padding: '1rem' }}>
-        <h2>Préstamo no encontrado</h2>
-        <Link to="/prestamos">← Volver a Lista de Préstamos</Link>
-      </div>
-    );
-  }
+  useEffect(() => {
+    getPrestamoById(id)
+      .then((res) => setPrestamo(res))
+      .catch((err) => {
+        console.error(err);
+        setError(err);
+      })
+      .finally(() => setLoading(false));
+  }, [id]);
+
+  if (loading) return <p>Cargando detalle préstamo...</p>;
+  if (error) return <p>Error al cargar detalle</p>;
 
   return (
-    <div style={{ padding: '1rem' }}>
-      <h1>Detalle de Préstamo</h1>
-      <div style={{ marginBottom: '0.5rem' }}>
-        <strong>ID:</strong> {prestamo.id}
-      </div>
-      <div style={{ marginBottom: '0.5rem' }}>
-        <strong>Usuario ID:</strong> {prestamo.usuario_id}
-      </div>
-      <div style={{ marginBottom: '0.5rem' }}>
-        <strong>Usuario Nombre:</strong> {prestamo.usuario_nombre}
-      </div>
-      <div style={{ marginBottom: '0.5rem' }}>
-        <strong>Material ID:</strong> {prestamo.material_id}
-      </div>
-      <div style={{ marginBottom: '0.5rem' }}>
-        <strong>Material Título:</strong> {prestamo.material_titulo}
-      </div>
-      <div style={{ marginBottom: '0.5rem' }}>
-        <strong>Fecha Préstamo:</strong> {prestamo.fecha_prestamo}
-      </div>
-      <div style={{ marginBottom: '0.5rem' }}>
-        <strong>Fecha Devolución:</strong> {prestamo.fecha_devolucion}
-      </div>
-      <div style={{ marginBottom: '0.5rem' }}>
-        <strong>Estado:</strong> {prestamo.estado}
-      </div>
-      <div style={{ marginBottom: '0.5rem' }}>
-        <strong>Multa:</strong> {prestamo.multa}
-      </div>
-      <div style={{ marginBottom: '0.5rem' }}>
-        <strong>Notas:</strong> {prestamo.notas || '—'}
-      </div>
-      <Link to="/prestamos">← Volver a Lista de Préstamos</Link>
+    <div>
+      <h1>Detalle Préstamo #{prestamo.id}</h1>
+      <p><strong>Usuario:</strong> {prestamo.usuario_nombre}</p>
+      <p><strong>Material:</strong> {prestamo.material_titulo}</p>
+      <p><strong>Fecha Préstamo:</strong> {prestamo.fecha_prestamo}</p>
+      <p><strong>Fecha Devolución:</strong> {prestamo.fecha_devolucion}</p>
+      <p><strong>Estado:</strong> {prestamo.estado}</p>
+      <p><strong>Multa:</strong> {prestamo.multa}</p>
+      <p><strong>Notas:</strong> {prestamo.notas}</p>
+
+      <Link to={`/prestamos/${id}/editar`}>Editar</Link> |{" "}
+      <Link to="/prestamos">Volver a la lista</Link>
     </div>
   );
 }

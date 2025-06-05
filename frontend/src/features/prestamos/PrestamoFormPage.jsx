@@ -1,161 +1,132 @@
 // src/features/prestamos/PrestamoFormPage.jsx
-
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import prestamosMock from '../../services/mock/prestamosMock';
-import usuariosMock from '../../services/mock/usuariosMock';
-import materialesMock from '../../services/mock/materialesMock';
+import React, { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { getPrestamoById, createPrestamo, updatePrestamo } from "../../services/api/prestamosApi";
 
 export default function PrestamoFormPage() {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const [usuarioId, setUsuarioId] = useState('');
-  const [materialId, setMaterialId] = useState('');
-  const [fechaPrestamo, setFechaPrestamo] = useState('');
-  const [fechaDevolucion, setFechaDevolucion] = useState('');
-  const [notas, setNotas] = useState('');
+  const [formValues, setFormValues] = useState({
+    usuario_id: "",
+    material_id: "",
+    fecha_prestamo: "",
+    fecha_devolucion: "",
+    notas: ""
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  // En edición, precargar datos
   useEffect(() => {
-    if (id) {
-      const pr = prestamosMock.find((p) => String(p.id) === id);
-      if (pr) {
-        setUsuarioId(pr.usuario_id);
-        setMaterialId(pr.material_id);
-        setFechaPrestamo(pr.fecha_prestamo);
-        setFechaDevolucion(pr.fecha_devolucion);
-        setNotas(pr.notas || '');
-      }
-    }
+    if (!id) return;
+    setLoading(true);
+    getPrestamoById(id)
+      .then((res) => {
+        setFormValues({
+          usuario_id: res.usuario_id,
+          material_id: res.material_id,
+          fecha_prestamo: res.fecha_prestamo,
+          fecha_devolucion: res.fecha_devolucion,
+          notas: res.notas || ""
+        });
+      })
+      .catch((err) => {
+        console.error(err);
+        setError(err);
+      })
+      .finally(() => setLoading(false));
   }, [id]);
 
-  const handleSubmit = (e) => {
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormValues((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Validaciones básicas
-    if (!usuarioId || !materialId || !fechaPrestamo || !fechaDevolucion) {
-      alert('Por favor, completa todos los campos obligatorios.');
-      return;
+    setLoading(true);
+    setError(null);
+    try {
+      if (id) {
+        await updatePrestamo(id, formValues);
+      } else {
+        await createPrestamo(formValues);
+      }
+      navigate("/prestamos");
+    } catch (err) {
+      console.error(err);
+      setError(err.response?.data?.detail || "Error desconocido");
+    } finally {
+      setLoading(false);
     }
-    // Validar que fechaDevolucion >= fechaPrestamo
-    if (new Date(fechaDevolucion) < new Date(fechaPrestamo)) {
-      alert('La fecha de devolución no puede ser anterior a la fecha de préstamo.');
-      return;
-    }
-
-    // Obtener nombres (solo para mock)
-    const usuario = usuariosMock.find((u) => u.id === Number(usuarioId));
-    const material = materialesMock.find((m) => m.id === Number(materialId));
-    const formData = {
-      id: id || '(nuevo)',
-      usuario_id: Number(usuarioId),
-      usuario_nombre: usuario ? usuario.nombre : '—',
-      material_id: Number(materialId),
-      material_titulo: material ? material.titulo : '—',
-      fecha_prestamo: fechaPrestamo,
-      fecha_devolucion: fechaDevolucion,
-      estado: id ? prestamosMock.find((p) => String(p.id) === id).estado : 'pendiente',
-      multa: id ? prestamosMock.find((p) => String(p.id) === id).multa : 0,
-      notas: notas.trim(),
-    };
-
-    if (id) {
-      console.log('Actualizando préstamo:', formData);
-      alert(`Préstamo ID ${id} actualizado (simulado).`);
-    } else {
-      console.log('Creando préstamo nuevo:', formData);
-      alert('Préstamo creado (simulado).');
-    }
-
-    navigate('/prestamos');
   };
 
   return (
-    <div style={{ padding: '1rem' }}>
-      <h1>{id ? 'Editar Préstamo' : 'Crear Préstamo'}</h1>
+    <div>
+      <h1>{id ? "Editar Préstamo" : "Crear Préstamo"}</h1>
+      {error && <p style={{ color: "red" }}>{error}</p>}
       <form onSubmit={handleSubmit}>
-        <div style={{ marginBottom: '0.5rem' }}>
-          <label>
-            Usuario*:
-            <select
-              value={usuarioId}
-              onChange={(e) => setUsuarioId(e.target.value)}
-              style={{ marginLeft: '0.5rem' }}
-            >
-              <option value="">-- Selecciona usuario --</option>
-              {usuariosMock.map((u) => (
-                <option key={u.id} value={u.id}>
-                  {u.nombre} (ID {u.id})
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
+        <label>
+          Usuario ID:
+          <input
+            type="number"
+            name="usuario_id"
+            value={formValues.usuario_id}
+            onChange={handleChange}
+            required
+          />
+        </label>
+        <br />
 
-        <div style={{ marginBottom: '0.5rem' }}>
-          <label>
-            Material*:
-            <select
-              value={materialId}
-              onChange={(e) => setMaterialId(e.target.value)}
-              style={{ marginLeft: '0.5rem' }}
-            >
-              <option value="">-- Selecciona material --</option>
-              {materialesMock.map((m) => (
-                <option key={m.id} value={m.id}>
-                  {m.titulo} (ID {m.id})
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
+        <label>
+          Material ID:
+          <input
+            type="number"
+            name="material_id"
+            value={formValues.material_id}
+            onChange={handleChange}
+            required
+          />
+        </label>
+        <br />
 
-        <div style={{ marginBottom: '0.5rem' }}>
-          <label>
-            Fecha Préstamo*:
-            <input
-              type="date"
-              value={fechaPrestamo}
-              onChange={(e) => setFechaPrestamo(e.target.value)}
-              style={{ marginLeft: '0.5rem' }}
-            />
-          </label>
-        </div>
+        <label>
+          Fecha Préstamo:
+          <input
+            type="date"
+            name="fecha_prestamo"
+            value={formValues.fecha_prestamo}
+            onChange={handleChange}
+            required
+          />
+        </label>
+        <br />
 
-        <div style={{ marginBottom: '0.5rem' }}>
-          <label>
-            Fecha Devolución*:
-            <input
-              type="date"
-              value={fechaDevolucion}
-              onChange={(e) => setFechaDevolucion(e.target.value)}
-              style={{ marginLeft: '0.5rem' }}
-            />
-          </label>
-        </div>
+        <label>
+          Fecha Devolución:
+          <input
+            type="date"
+            name="fecha_devolucion"
+            value={formValues.fecha_devolucion}
+            onChange={handleChange}
+            required
+          />
+        </label>
+        <br />
 
-        <div style={{ marginBottom: '0.5rem' }}>
-          <label>
-            Notas:
-            <textarea
-              value={notas}
-              onChange={(e) => setNotas(e.target.value)}
-              style={{ marginLeft: '0.5rem', width: '400px', height: '80px' }}
-            />
-          </label>
-        </div>
+        <label>
+          Notas:
+          <textarea
+            name="notas"
+            value={formValues.notas}
+            onChange={handleChange}
+          />
+        </label>
+        <br />
 
-        <div style={{ marginTop: '1rem' }}>
-          <button type="submit">{id ? 'Actualizar' : 'Crear'}</button>
-          <button
-            type="button"
-            onClick={() => navigate('/prestamos')}
-            style={{ marginLeft: '0.5rem' }}
-          >
-            Cancelar
-          </button>
-        </div>
+        <button type="submit" disabled={loading}>
+          {loading ? "Guardando..." : id ? "Actualizar" : "Crear"}
+        </button>
       </form>
     </div>
   );

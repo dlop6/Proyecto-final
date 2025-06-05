@@ -1,21 +1,29 @@
-import { getJSON, postJSON, putJSON, deleteJSON } from '../../utils/apiClient';
+// src/services/api/materialesApi.js
+import apiClient from "../../utils/apiClient";
 
-export async function fetchMateriales(page = 1, per_page = 20) {
-  return getJSON('/materiales', { page, per_page });
-}
+export const getMateriales = async (page = 1, perPage = 20) => {
+  const response = await apiClient.get("/materiales", {
+    params: { page, per_page: perPage }
+  });
+  return response.data; // { total_items, total_pages, current_page, per_page, items }
+};
 
-export async function fetchMaterialById(id) {
-  return getJSON(`/materiales/${id}`);
-}
+export const getMaterialById = async (id) => {
+  const response = await apiClient.get(`/materiales/${id}`);
+  return response.data; // { id, titulo, autor, ... }
+};
 
-export async function createMaterial(data) {
-  return postJSON('/materiales', data);
-}
+export const createMaterial = async (materialData) => {
+  const response = await apiClient.post("/materiales", materialData);
+  return response.data; // objeto del material creado
+};
 
-export async function updateMaterial(id, data) {
-  return putJSON(`/materiales/${id}`, data);
-}
+export const updateMaterial = async (id, materialData) => {
+  const response = await apiClient.put(`/materiales/${id}`, materialData);
+  return response.data; // objeto del material actualizado
+};
 
-export async function deleteMaterial(id) {
-  return deleteJSON(`/materiales/${id}`);
-}
+export const deleteMaterial = async (id) => {
+  await apiClient.delete(`/materiales/${id}`);
+  // Si no devuelve cuerpo, con esto basta
+};

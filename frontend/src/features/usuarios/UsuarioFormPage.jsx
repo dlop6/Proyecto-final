@@ -1,129 +1,116 @@
 // src/features/usuarios/UsuarioFormPage.jsx
-
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import usuariosMock from '../../services/mock/usuariosMock';
+import React, { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { getUsuarioById, createUsuario, updateUsuario } from "../../services/api/usuariosApi";
 
 export default function UsuarioFormPage() {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const [nombre, setNombre] = useState('');
-  const [email, setEmail] = useState('');
-  const [rol, setRol] = useState('estudiante');
-  const [telefono, setTelefono] = useState('');
+  const [formValues, setFormValues] = useState({
+    nombre: "",
+    email: "",
+    rol: "estudiante",
+    telefono: ""
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (id) {
-      const usr = usuariosMock.find((u) => String(u.id) === id);
-      if (usr) {
-        setNombre(usr.nombre);
-        setEmail(usr.email);
-        setRol(usr.rol);
-        setTelefono(usr.telefono || '');
-      }
-    }
+    if (!id) return;
+    setLoading(true);
+    getUsuarioById(id)
+      .then((res) => {
+        setFormValues({
+          nombre: res.nombre,
+          email: res.email,
+          rol: res.rol,
+          telefono: res.telefono || ""
+        });
+      })
+      .catch((err) => {
+        console.error(err);
+        setError(err);
+      })
+      .finally(() => setLoading(false));
   }, [id]);
 
-  const handleSubmit = (e) => {
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormValues((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Validaciones básicas
-    if (!nombre.trim() || !email.trim() || !rol) {
-      alert('Por favor llena todos los campos obligatorios.');
-      return;
+    setLoading(true);
+    setError(null);
+    try {
+      if (id) {
+        await updateUsuario(id, formValues);
+      } else {
+        await createUsuario(formValues);
+      }
+      navigate("/usuarios");
+    } catch (err) {
+      console.error(err);
+      setError(err.response?.data?.detail || "Error desconocido");
+    } finally {
+      setLoading(false);
     }
-    // Validar formato básico de email
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      alert('Ingresa un email válido.');
-      return;
-    }
-
-    const formData = {
-      id: id || '(nuevo)',
-      nombre: nombre.trim(),
-      email: email.trim(),
-      rol,
-      telefono: telefono.trim(),
-      fecha_registro: id ? undefined : new Date().toISOString().slice(0, 10), // YYYY-MM-DD
-    };
-
-    if (id) {
-      console.log('Actualizando usuario:', formData);
-      alert(`Usuario ID ${id} actualizado (simulado).`);
-    } else {
-      console.log('Creando usuario nuevo:', formData);
-      alert('Usuario creado (simulado).');
-    }
-
-    navigate('/usuarios');
   };
 
   return (
-    <div style={{ padding: '1rem' }}>
-      <h1>{id ? 'Editar Usuario' : 'Crear Usuario'}</h1>
+    <div>
+      <h1>{id ? "Editar Usuario" : "Crear Usuario"}</h1>
+      {error && <p style={{ color: "red" }}>{error}</p>}
       <form onSubmit={handleSubmit}>
-        <div style={{ marginBottom: '0.5rem' }}>
-          <label>
-            Nombre*:
-            <input
-              type="text"
-              value={nombre}
-              onChange={(e) => setNombre(e.target.value)}
-              style={{ marginLeft: '0.5rem', width: '300px' }}
-            />
-          </label>
-        </div>
+        <label>
+          Nombre:
+          <input
+            type="text"
+            name="nombre"
+            value={formValues.nombre}
+            onChange={handleChange}
+            required
+          />
+        </label>
+        <br />
 
-        <div style={{ marginBottom: '0.5rem' }}>
-          <label>
-            Email*:
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              style={{ marginLeft: '0.5rem', width: '300px' }}
-            />
-          </label>
-        </div>
+        <label>
+          Email:
+          <input
+            type="email"
+            name="email"
+            value={formValues.email}
+            onChange={handleChange}
+            required
+          />
+        </label>
+        <br />
 
-        <div style={{ marginBottom: '0.5rem' }}>
-          <label>
-            Rol*:
-            <select
-              value={rol}
-              onChange={(e) => setRol(e.target.value)}
-              style={{ marginLeft: '0.5rem' }}
-            >
-              <option value="estudiante">estudiante</option>
-              <option value="bibliotecario">bibliotecario</option>
-            </select>
-          </label>
-        </div>
+        <label>
+          Rol:
+          <select name="rol" value={formValues.rol} onChange={handleChange} required>
+            <option value="estudiante">Estudiante</option>
+            <option value="bibliotecario">Bibliotecario</option>
+          </select>
+        </label>
+        <br />
 
-        <div style={{ marginBottom: '0.5rem' }}>
-          <label>
-            Teléfono:
-            <input
-              type="text"
-              value={telefono}
-              onChange={(e) => setTelefono(e.target.value)}
-              style={{ marginLeft: '0.5rem', width: '200px' }}
-            />
-          </label>
-        </div>
+        <label>
+          Teléfono:
+          <input
+            type="text"
+            name="telefono"
+            value={formValues.telefono}
+            onChange={handleChange}
+          />
+        </label>
+        <br />
 
-        <div style={{ marginTop: '1rem' }}>
-          <button type="submit">{id ? 'Actualizar' : 'Crear'}</button>
-          <button
-            type="button"
-            onClick={() => navigate('/usuarios')}
-            style={{ marginLeft: '0.5rem' }}
-          >
-            Cancelar
-          </button>
-        </div>
+        <button type="submit" disabled={loading}>
+          {loading ? "Guardando..." : id ? "Actualizar" : "Crear"}
+        </button>
       </form>
     </div>
   );

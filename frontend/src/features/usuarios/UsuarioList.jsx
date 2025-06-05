@@ -1,36 +1,34 @@
 // src/features/usuarios/UsuarioList.jsx
+import React from "react";
+import { Link } from "react-router-dom";
 
-import React from 'react';
-import { Link } from 'react-router-dom';
-
-export default function UsuarioList({ data }) {
+export default function UsuarioList({ items }) {
   return (
-    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+    <table>
       <thead>
         <tr>
-          <th style={{ border: '1px solid #ccc', padding: '8px' }}>ID</th>
-          <th style={{ border: '1px solid #ccc', padding: '8px' }}>Nombre</th>
-          <th style={{ border: '1px solid #ccc', padding: '8px' }}>Email</th>
-          <th style={{ border: '1px solid #ccc', padding: '8px' }}>Rol</th>
-          <th style={{ border: '1px solid #ccc', padding: '8px' }}>Fecha Registro</th>
-          <th style={{ border: '1px solid #ccc', padding: '8px' }}>Acciones</th>
+          <th>ID</th>
+          <th>Nombre</th>
+          <th>Email</th>
+          <th>Rol</th>
+          <th>Fecha Registro</th>
+          <th>Acciones</th>
         </tr>
       </thead>
       <tbody>
-        {data.map((user) => (
-          <tr key={user.id}>
-            <td style={{ border: '1px solid #ccc', padding: '8px' }}>{user.id}</td>
-            <td style={{ border: '1px solid #ccc', padding: '8px' }}>{user.nombre}</td>
-            <td style={{ border: '1px solid #ccc', padding: '8px' }}>{user.email}</td>
-            <td style={{ border: '1px solid #ccc', padding: '8px' }}>{user.rol}</td>
-            <td style={{ border: '1px solid #ccc', padding: '8px' }}>{user.fecha_registro}</td>
-            <td style={{ border: '1px solid #ccc', padding: '8px' }}>
-              <Link to={`/usuarios/${user.id}`} style={{ marginRight: '8px' }}>Ver</Link>
-              <Link to={`/usuarios/editar/${user.id}`} style={{ marginRight: '8px' }}>Editar</Link>
-              <button
-                onClick={() => alert(`Eliminar usuario ID ${user.id}`)}
-                style={{ cursor: 'pointer' }}
-              >
+        {items.map((u) => (
+          <tr key={u.id}>
+            <td>{u.id}</td>
+            <td>{u.nombre}</td>
+            <td>{u.email}</td>
+            <td>{u.rol}</td>
+            <td>{u.fecha_registro}</td>
+            <td>
+              <Link to={`/usuarios/${u.id}`}>Ver</Link>{" | "}
+              <Link to={`/usuarios/${u.id}/editar`}>Editar</Link>{" | "}
+              <button onClick={() => {
+                // deleteUsuario(u.id) y refrescar
+              }}>
                 Eliminar
               </button>
             </td>

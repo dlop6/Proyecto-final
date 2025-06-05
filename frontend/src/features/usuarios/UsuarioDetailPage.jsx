@@ -1,44 +1,38 @@
 // src/features/usuarios/UsuarioDetailPage.jsx
-
-import React from 'react';
-import { useParams, Link } from 'react-router-dom';
-import usuariosMock from '../../services/mock/usuariosMock';
+import React, { useState, useEffect } from "react";
+import { useParams, Link } from "react-router-dom";
+import { getUsuarioById } from "../../services/api/usuariosApi";
 
 export default function UsuarioDetailPage() {
   const { id } = useParams();
-  const usuario = usuariosMock.find((u) => String(u.id) === id);
+  const [usuario, setUsuario] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  if (!usuario) {
-    return (
-      <div style={{ padding: '1rem' }}>
-        <h2>Usuario no encontrado</h2>
-        <Link to="/usuarios">← Volver a Lista de Usuarios</Link>
-      </div>
-    );
-  }
+  useEffect(() => {
+    getUsuarioById(id)
+      .then((res) => setUsuario(res))
+      .catch((err) => {
+        console.error(err);
+        setError(err);
+      })
+      .finally(() => setLoading(false));
+  }, [id]);
+
+  if (loading) return <p>Cargando detalle usuario...</p>;
+  if (error) return <p>Error al cargar detalle</p>;
 
   return (
-    <div style={{ padding: '1rem' }}>
-      <h1>Detalle de Usuario</h1>
-      <div style={{ marginBottom: '0.5rem' }}>
-        <strong>ID:</strong> {usuario.id}
-      </div>
-      <div style={{ marginBottom: '0.5rem' }}>
-        <strong>Nombre:</strong> {usuario.nombre}
-      </div>
-      <div style={{ marginBottom: '0.5rem' }}>
-        <strong>Email:</strong> {usuario.email}
-      </div>
-      <div style={{ marginBottom: '0.5rem' }}>
-        <strong>Rol:</strong> {usuario.rol}
-      </div>
-      <div style={{ marginBottom: '0.5rem' }}>
-        <strong>Fecha Registro:</strong> {usuario.fecha_registro}
-      </div>
-      <div style={{ marginBottom: '0.5rem' }}>
-        <strong>Teléfono:</strong> {usuario.telefono || '—'}
-      </div>
-      <Link to="/usuarios">← Volver a Lista de Usuarios</Link>
+    <div>
+      <h1>Detalle Usuario #{usuario.id}</h1>
+      <p><strong>Nombre:</strong> {usuario.nombre}</p>
+      <p><strong>Email:</strong> {usuario.email}</p>
+      <p><strong>Rol:</strong> {usuario.rol}</p>
+      <p><strong>Fecha Registro:</strong> {usuario.fecha_registro}</p>
+      {usuario.telefono && <p><strong>Teléfono:</strong> {usuario.telefono}</p>}
+
+      <Link to={`/usuarios/${id}/editar`}>Editar</Link> |{" "}
+      <Link to="/usuarios">Volver a la lista</Link>
     </div>
   );
 }
