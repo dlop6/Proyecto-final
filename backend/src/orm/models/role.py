@@ -2,6 +2,7 @@ from sqlalchemy import Column, Integer
 from .custom_types import user_role_enum
 from sqlalchemy import Enum
 from .base import Base
+from sqlalchemy.orm import relationship
 
 class Role(Base):
     __tablename__ = "roles"
