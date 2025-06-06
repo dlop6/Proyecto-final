@@ -32,19 +32,15 @@ export default function PrestamoFormPage() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
-    // Validaciones básicas
     if (!usuarioId || !materialId || !fechaPrestamo || !fechaDevolucion) {
       alert('Por favor, completa todos los campos obligatorios.');
       return;
     }
-    // Validar que fechaDevolucion >= fechaPrestamo
     if (new Date(fechaDevolucion) < new Date(fechaPrestamo)) {
       alert('La fecha de devolución no puede ser anterior a la fecha de préstamo.');
       return;
     }
 
-    // Obtener nombres (solo para mock)
     const usuario = usuariosMock.find((u) => u.id === Number(usuarioId));
     const material = materialesMock.find((m) => m.id === Number(materialId));
     const formData = {
@@ -72,78 +68,63 @@ export default function PrestamoFormPage() {
   };
 
   return (
-    <div style={{ padding: '1rem' }}>
-      <h1>{id ? 'Editar Préstamo' : 'Crear Préstamo'}</h1>
+    <div className="container">
+      <h1 className="page-title">{id ? 'Editar Préstamo' : 'Crear Préstamo'}</h1>
       <form onSubmit={handleSubmit}>
-        <div style={{ marginBottom: '0.5rem' }}>
-          <label>
-            Usuario*:
-            <select
-              value={usuarioId}
-              onChange={(e) => setUsuarioId(e.target.value)}
-              style={{ marginLeft: '0.5rem' }}
-            >
-              <option value="">-- Selecciona usuario --</option>
-              {usuariosMock.map((u) => (
-                <option key={u.id} value={u.id}>
-                  {u.nombre} (ID {u.id})
-                </option>
-              ))}
-            </select>
-          </label>
+        <div className="form-group">
+          <label>Usuario*:</label>
+          <select
+            value={usuarioId}
+            onChange={(e) => setUsuarioId(e.target.value)}
+          >
+            <option value="">-- Selecciona usuario --</option>
+            {usuariosMock.map((u) => (
+              <option key={u.id} value={u.id}>
+                {u.nombre} (ID {u.id})
+              </option>
+            ))}
+          </select>
         </div>
 
-        <div style={{ marginBottom: '0.5rem' }}>
-          <label>
-            Material*:
-            <select
-              value={materialId}
-              onChange={(e) => setMaterialId(e.target.value)}
-              style={{ marginLeft: '0.5rem' }}
-            >
-              <option value="">-- Selecciona material --</option>
-              {materialesMock.map((m) => (
-                <option key={m.id} value={m.id}>
-                  {m.titulo} (ID {m.id})
-                </option>
-              ))}
-            </select>
-          </label>
+        <div className="form-group">
+          <label>Material*:</label>
+          <select
+            value={materialId}
+            onChange={(e) => setMaterialId(e.target.value)}
+          >
+            <option value="">-- Selecciona material --</option>
+            {materialesMock.map((m) => (
+              <option key={m.id} value={m.id}>
+                {m.titulo} (ID {m.id})
+              </option>
+            ))}
+          </select>
         </div>
 
-        <div style={{ marginBottom: '0.5rem' }}>
-          <label>
-            Fecha Préstamo*:
-            <input
-              type="date"
-              value={fechaPrestamo}
-              onChange={(e) => setFechaPrestamo(e.target.value)}
-              style={{ marginLeft: '0.5rem' }}
-            />
-          </label>
+        <div className="form-group">
+          <label>Fecha Préstamo*:</label>
+          <input
+            type="date"
+            value={fechaPrestamo}
+            onChange={(e) => setFechaPrestamo(e.target.value)}
+          />
         </div>
 
-        <div style={{ marginBottom: '0.5rem' }}>
-          <label>
-            Fecha Devolución*:
-            <input
-              type="date"
-              value={fechaDevolucion}
-              onChange={(e) => setFechaDevolucion(e.target.value)}
-              style={{ marginLeft: '0.5rem' }}
-            />
-          </label>
+        <div className="form-group">
+          <label>Fecha Devolución*:</label>
+          <input
+            type="date"
+            value={fechaDevolucion}
+            onChange={(e) => setFechaDevolucion(e.target.value)}
+          />
         </div>
 
-        <div style={{ marginBottom: '0.5rem' }}>
-          <label>
-            Notas:
-            <textarea
-              value={notas}
-              onChange={(e) => setNotas(e.target.value)}
-              style={{ marginLeft: '0.5rem', width: '400px', height: '80px' }}
-            />
-          </label>
+        <div className="form-group">
+          <label>Notas:</label>
+          <textarea
+            value={notas}
+            onChange={(e) => setNotas(e.target.value)}
+          />
         </div>
 
         <div style={{ marginTop: '1rem' }}>
@@ -151,6 +132,7 @@ export default function PrestamoFormPage() {
           <button
             type="button"
             onClick={() => navigate('/prestamos')}
+            className="btn-cancel"
             style={{ marginLeft: '0.5rem' }}
           >
             Cancelar

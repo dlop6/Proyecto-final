@@ -1,0 +1,27 @@
+/* src/styles/Navbar.module.css */
+
+.navbar {
+  padding: 1rem;
+  border-bottom: 1px solid #ccc;
+  background-color: #ffffff;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.link {
+  margin-right: 1rem;
+  color: #333;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.link:hover {
+  color: #0066cc;
+}
+
+.span {
+  margin-right: 0.5rem;
+  font-weight: 500;
+  color: #555;
+}

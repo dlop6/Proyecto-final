@@ -2,18 +2,31 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
+import styles from '../styles/Navbar.module.css';
 
 export default function Navbar() {
   return (
-    <nav style={{ padding: '1rem', borderBottom: '1px solid #ccc' }}>
-      <Link to="/materiales" style={{ marginRight: '1rem' }}>Materiales</Link>
-      <Link to="/usuarios" style={{ marginRight: '1rem' }}>Usuarios</Link>
-      <Link to="/prestamos" style={{ marginRight: '1rem' }}>Préstamos</Link>
-      {/* Separar los enlaces de Reportes */}
-      <span style={{ marginRight: '0.5rem' }}>Reportes:</span>
-      <Link to="/reportes/materiales" style={{ marginRight: '0.5rem' }}>Materiales</Link>
-      <Link to="/reportes/prestamos" style={{ marginRight: '0.5rem' }}>Préstamos</Link>
-      <Link to="/reportes/general" style={{ marginRight: '1rem' }}>General</Link>
+    <nav className={styles.navbar}>
+      <Link to="/materiales" className={styles.link}>
+        Materiales
+      </Link>
+      <Link to="/usuarios" className={styles.link}>
+        Usuarios
+      </Link>
+      <Link to="/prestamos" className={styles.link}>
+        Préstamos
+      </Link>
+
+      <span className={styles.span}>Reportes:</span>
+      <Link to="/reportes/materiales" className={styles.link}>
+        Materiales
+      </Link>
+      <Link to="/reportes/prestamos" className={styles.link}>
+        Préstamos
+      </Link>
+      <Link to="/reportes/general" className={styles.link}>
+        General
+      </Link>
     </nav>
   );
 }

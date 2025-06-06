@@ -1,10 +1,13 @@
 // src/features/reportes/ReporteGeneralPage.jsx
 
 import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { saveAs } from 'file-saver';
 import eventsMock from '../../services/mock/eventsMock';
 
 export default function ReporteGeneralPage() {
+  const navigate = useNavigate();
+
   // Filtros
   const [usuarioId, setUsuarioId] = useState('');
   const [materialId, setMaterialId] = useState('');
@@ -57,51 +60,77 @@ export default function ReporteGeneralPage() {
     ]);
 
     let csvContent = header.join(',') + '\r\n';
-   rows.forEach((row) => {
-    csvContent += row.join(',') + '\r\n';
-  });
+    rows.forEach((row) => {
+      csvContent += row.join(',') + '\r\n';
+    });
 
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     saveAs(blob, 'reporte_general.csv');
   };
 
-  return (
-    <div style={{ padding: '1rem' }}>
-      <h1>Reporte General de Actividad</h1>
+  const handleDelete = (eventoId) => {
+    if (window.confirm(`¿Eliminar evento ID ${eventoId}?`)) {
+      const index = eventsMock.findIndex((e) => e.evento_id === eventoId);
+      if (index !== -1) eventsMock.splice(index, 1);
+      if (paginatedData.length === 1 && currentPage > 1) {
+        setCurrentPage((p) => p - 1);
+      } else {
+        setCurrentPage((p) => p);
+      }
+    }
+  };
 
-      <div style={{ marginBottom: '1rem' }}>
+  return (
+    <div className="container">
+      <h1 className="page-title">Reporte General de Actividad</h1>
+
+      <button onClick={() => navigate('/eventos/crear')} style={{ marginBottom: '1rem' }}>
+        Crear Evento
+      </button>
+
+      <div className="filter-panel">
         <input
           type="number"
           placeholder="Usuario ID"
           value={usuarioId}
-          onChange={(e) => setUsuarioId(e.target.value)}
-          style={{ marginRight: '0.5rem', width: '80px' }}
+          onChange={(e) => {
+            setUsuarioId(e.target.value);
+            setCurrentPage(1);
+          }}
         />
         <input
           type="number"
           placeholder="Material ID"
           value={materialId}
-          onChange={(e) => setMaterialId(e.target.value)}
-          style={{ marginRight: '0.5rem', width: '80px' }}
+          onChange={(e) => {
+            setMaterialId(e.target.value);
+            setCurrentPage(1);
+          }}
         />
         <input
           type="date"
           placeholder="Evento inicio"
           value={fechaInicio}
-          onChange={(e) => setFechaInicio(e.target.value)}
-          style={{ marginRight: '0.5rem' }}
+          onChange={(e) => {
+            setFechaInicio(e.target.value);
+            setCurrentPage(1);
+          }}
         />
         <input
           type="date"
           placeholder="Evento fin"
           value={fechaFin}
-          onChange={(e) => setFechaFin(e.target.value)}
-          style={{ marginRight: '0.5rem' }}
+          onChange={(e) => {
+            setFechaFin(e.target.value);
+            setCurrentPage(1);
+          }}
         />
         <select
           value={tipoEvento}
-          onChange={(e) => setTipoEvento(e.target.value)}
-          style={{ marginRight: '0.5rem' }}
+          onChange={(e) => {
+            setTipoEvento(e.target.value);
+            setCurrentPage(1);
+          }}
         >
           <option value="">-- Tipo Evento --</option>
           <option value="prestamo">prestamo</option>
@@ -110,48 +139,62 @@ export default function ReporteGeneralPage() {
           <option value="pago_multa">pago_multa</option>
         </select>
 
-        <button onClick={handleExportCSV} style={{ marginLeft: '1rem' }}>
-          Exportar CSV
-        </button>
+        <button onClick={handleExportCSV}>Exportar CSV</button>
       </div>
 
-      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+      <table className="table">
         <thead>
           <tr>
-            <th style={{ border: '1px solid #ccc', padding: '8px' }}>Evento ID</th>
-            <th style={{ border: '1px solid #ccc', padding: '8px' }}>Usuario ID</th>
-            <th style={{ border: '1px solid #ccc', padding: '8px' }}>Usuario Nombre</th>
-            <th style={{ border: '1px solid #ccc', padding: '8px' }}>Material ID</th>
-            <th style={{ border: '1px solid #ccc', padding: '8px' }}>Material Título</th>
-            <th style={{ border: '1px solid #ccc', padding: '8px' }}>Tipo Evento</th>
-            <th style={{ border: '1px solid #ccc', padding: '8px' }}>Fecha Evento</th>
-            <th style={{ border: '1px solid #ccc', padding: '8px' }}>Notas</th>
+            <th>Evento ID</th>
+            <th>Usuario ID</th>
+            <th>Usuario Nombre</th>
+            <th>Material ID</th>
+            <th>Material Título</th>
+            <th>Tipo Evento</th>
+            <th>Fecha Evento</th>
+            <th>Notas</th>
+            <th>Acciones</th>
           </tr>
         </thead>
         <tbody>
           {paginatedData.map((e) => (
             <tr key={e.evento_id}>
-              <td style={{ border: '1px solid #ccc', padding: '8px' }}>{e.evento_id}</td>
-              <td style={{ border: '1px solid #ccc', padding: '8px' }}>{e.usuario_id}</td>
-              <td style={{ border: '1px solid #ccc', padding: '8px' }}>{e.usuario_nombre}</td>
-              <td style={{ border: '1px solid #ccc', padding: '8px' }}>{e.material_id}</td>
-              <td style={{ border: '1px solid #ccc', padding: '8px' }}>{e.material_titulo}</td>
-              <td style={{ border: '1px solid #ccc', padding: '8px' }}>{e.tipo_evento}</td>
-              <td style={{ border: '1px solid #ccc', padding: '8px' }}>{e.fecha_evento}</td>
-              <td style={{ border: '1px solid #ccc', padding: '8px' }}>{e.notas}</td>
+              <td>{e.evento_id}</td>
+              <td>{e.usuario_id}</td>
+              <td>{e.usuario_nombre}</td>
+              <td>{e.material_id}</td>
+              <td>{e.material_titulo}</td>
+              <td>{e.tipo_evento}</td>
+              <td>{e.fecha_evento}</td>
+              <td>{e.notas}</td>
+              <td>
+                <Link to={`/eventos/${e.evento_id}`} style={{ marginRight: '0.5rem' }}>
+                  Ver
+                </Link>
+                <Link to={`/eventos/editar/${e.evento_id}`} style={{ marginRight: '0.5rem' }}>
+                  Editar
+                </Link>
+                <button onClick={() => handleDelete(e.evento_id)}>Eliminar</button>
+              </td>
             </tr>
           ))}
         </tbody>
       </table>
 
-      <div style={{ marginTop: '1rem', display: 'flex', alignItems: 'center' }}>
-        <button onClick={() => setCurrentPage((p) => (p > 1 ? p - 1 : p))} disabled={currentPage === 1}>
+      <div className="pagination">
+        <button
+          onClick={() => setCurrentPage((p) => (p > 1 ? p - 1 : p))}
+          disabled={currentPage === 1}
+        >
           Anterior
         </button>
-        <span style={{ margin: '0 1rem' }}>
+        <span>
           Página {currentPage} de {totalPages}
         </span>
-        <button onClick={() => setCurrentPage((p) => (p < totalPages ? p + 1 : p))} disabled={currentPage === totalPages}>
+        <button
+          onClick={() => setCurrentPage((p) => (p < totalPages ? p + 1 : p))}
+          disabled={currentPage === totalPages}
+        >
           Siguiente
         </button>
       </div>
