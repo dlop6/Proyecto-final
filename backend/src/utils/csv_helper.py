@@ -1,1 +1,0 @@
-# esto va servir para pasarlo en formato csv
